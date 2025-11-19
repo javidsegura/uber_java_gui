@@ -1,0 +1,54 @@
+graph TB
+    subgraph PresentationLayer["Presentation Layer - JavaFX"]
+        LoginView[Login/Register Screen]
+        PassengerDash[Passenger Dashboard<br/>- Create Request<br/>- My Requests<br/>- History]
+        DriverDash[Driver Dashboard<br/>- My Cars<br/>- Open Requests<br/>- My Accepted Rides]
+    end
+    
+    subgraph BusinessLayer["Business Logic Layer"]
+        AuthService[AuthService<br/>- Login/Register<br/>- Email validation<br/>- Role switching]
+        RideService[RideService<br/>- Create/Accept rides<br/>- List requests<br/>- Calculate price<br/>- Complete rides]
+        CSVExporter[CSVExporter<br/>- Export ride history]
+    end
+    
+    subgraph DataAccessLayer["Data Access Layer - DAO Pattern"]
+        UserDAO[UserDAO]
+        RideDAO[RideDAO]
+        CarDAO[CarDAO]
+        DatabaseManager[DatabaseManager<br/>- Connection pool<br/>- Transactions]
+    end
+    
+    subgraph DataLayer["Data Layer"]
+        Database[(MySQL/PostgreSQL<br/>Tables:<br/>- users<br/>- cars<br/>- rides)]
+        FileSystem[File System<br/>- CSV exports<br/>- Logs]
+    end
+    
+    subgraph External["External"]
+        EmailService[Email Service<br/>verification only]
+    end
+    
+    %% Connections
+    LoginView --> AuthService
+    PassengerDash --> RideService
+    DriverDash --> RideService
+    DriverDash --> CSVExporter
+    PassengerDash --> CSVExporter
+    
+    AuthService --> UserDAO
+    RideService --> RideDAO
+    RideService --> CarDAO
+    
+    UserDAO --> DatabaseManager
+    RideDAO --> DatabaseManager
+    CarDAO --> DatabaseManager
+    
+    DatabaseManager --> Database
+    CSVExporter --> FileSystem
+    
+    AuthService -.-> EmailService
+    
+    style PresentationLayer fill:#e1f5ff
+    style BusinessLayer fill:#fff4e1
+    style DataAccessLayer fill:#e8f5e8
+    style DataLayer fill:#f0f0f0
+    style External fill:#ffe1f0

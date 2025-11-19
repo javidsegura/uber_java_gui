@@ -1,0 +1,77 @@
+sequenceDiagram
+    actor P as Passenger
+    participant UI as JavaFX UI
+    participant Auth as AuthService
+    participant RS as RideService
+    participant DB as DatabaseManager
+    participant D as Driver
+    
+    Note over P,D: 1. Passenger Login & Ride Request
+    P->>UI: Login (email, password)
+    UI->>Auth: login(email, password)
+    Auth->>DB: Query user by email
+    DB-->>Auth: User data
+    Auth->>Auth: Verify password hash
+    Auth-->>UI: User object (role: PASSENGER)
+    UI-->>P: Show Passenger Dashboard
+    
+    P->>UI: Create ride request<br/>(origin, destination, time, seats)
+    UI->>RS: createRideRequest(passengerDetails)
+    RS->>RS: validateRequest()
+    RS->>RS: calculatePriceEstimate()
+    RS->>DB: INSERT INTO rides (status=PENDING)
+    DB-->>RS: ride_id
+    RS-->>UI: Ride created successfully
+    UI-->>P: "Request submitted! Waiting for driver..."
+    
+    Note over P,D: 2. Driver Views & Accepts Request
+    D->>UI: Login (email, password)
+    UI->>Auth: login(email, password)
+    Auth->>DB: Query user by email
+    DB-->>Auth: User data
+    Auth-->>UI: User object (role: DRIVER)
+    UI-->>D: Show Driver Dashboard
+    
+    D->>UI: View open ride requests
+    UI->>RS: listOpenRequests()
+    RS->>DB: SELECT * FROM rides WHERE status=PENDING
+    DB-->>RS: List of pending rides
+    RS-->>UI: Pending rides with details
+    UI-->>D: Display requests table
+    
+    D->>UI: Accept ride (select car)
+    UI->>RS: acceptRide(rideId, driverId, carId)
+    RS->>DB: SELECT seating_capacity FROM cars WHERE car_id=?
+    DB-->>RS: Car capacity
+    
+    alt Capacity sufficient
+        RS->>RS: Validate: car.capacity >= ride.seatsNeeded
+        RS->>DB: BEGIN TRANSACTION
+        RS->>DB: UPDATE rides SET driver_id=?, car_id=?, status=CONFIRMED
+        RS->>DB: COMMIT
+        DB-->>RS: Success
+        RS-->>UI: Ride accepted!
+        UI-->>D: "Ride confirmed! Details: ..."
+        UI->>P: Notification: "Driver found!"
+    else Capacity exceeded
+        RS->>RS: Throw CapacityExceededException
+        RS-->>UI: Error: "Car doesn't have enough seats"
+        UI-->>D: Show error message
+    end
+    
+    Note over P,D: 3. Ride Completion
+    D->>UI: Mark ride complete
+    UI->>RS: markRideComplete(rideId)
+    RS->>DB: UPDATE rides SET status=COMPLETED
+    DB-->>RS: Success
+    RS-->>UI: Ride marked complete
+    UI-->>D: "Ride completed successfully"
+    
+    Note over P,D: 4. Export History (Optional)
+    P->>UI: Export my ride history
+    UI->>RS: getRidesByPassenger(passengerId)
+    RS->>DB: SELECT * FROM rides WHERE passenger_id=?
+    DB-->>RS: Passenger's rides
+    RS-->>UI: Ride list
+    UI->>UI: CSVExporter.exportRideHistory()
+    UI-->>P: Download rides.csv

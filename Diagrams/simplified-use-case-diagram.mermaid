@@ -1,0 +1,78 @@
+graph TB
+    subgraph System["TeeTime Ride-Sharing System"]
+        subgraph PassengerCases["Passenger Use Cases"]
+            UC1[Register Account]
+            UC2[Login/Logout]
+            UC3[Create Ride Request]
+            UC4[View My Requests]
+            UC5[Cancel Pending Request]
+            UC6[View Ride History]
+            UC7[Switch to Driver Role]
+        end
+        
+        subgraph DriverCases["Driver Use Cases"]
+            UC8[Add Car]
+            UC9[Remove Car]
+            UC10[View My Cars]
+            UC11[View Open Ride Requests]
+            UC12[Accept Ride Request]
+            UC13[Decline Ride Request]
+            UC14[View My Accepted Rides]
+            UC15[Mark Ride Complete]
+            UC16[Switch to Passenger Role]
+        end
+        
+        subgraph SharedCases["Shared Functions"]
+            UC17[Update Profile]
+            UC18[Export Ride History CSV]
+        end
+    end
+    
+    %% Actors
+    Passenger((Passenger<br/>Student/Staff))
+    Driver((Driver<br/>Car Owner))
+    Email[Email System]
+    
+    %% Passenger Connections
+    Passenger --> UC1
+    Passenger --> UC2
+    Passenger --> UC3
+    Passenger --> UC4
+    Passenger --> UC5
+    Passenger --> UC6
+    Passenger --> UC7
+    Passenger --> UC17
+    Passenger --> UC18
+    
+    %% Driver Connections (can also do passenger things)
+    Driver --> UC8
+    Driver --> UC9
+    Driver --> UC10
+    Driver --> UC11
+    Driver --> UC12
+    Driver --> UC13
+    Driver --> UC14
+    Driver --> UC15
+    Driver --> UC16
+    Driver --> UC3
+    Driver --> UC4
+    Driver --> UC6
+    Driver --> UC17
+    Driver --> UC18
+    
+    %% External System
+    UC1 -.->|sends verification| Email
+    
+    %% Use Case Relationships
+    UC3 -->|requires login| UC2
+    UC12 -->|updates| UC3
+    UC15 -->|requires| UC12
+    UC7 -->|changes role| UC1
+    UC16 -->|changes role| UC1
+    
+    style Passenger fill:#e1f5ff
+    style Driver fill:#fff4e1
+    style Email fill:#f0f0f0
+    style PassengerCases fill:#e8f4f8
+    style DriverCases fill:#fff9e6
+    style SharedCases fill:#f0f0f0

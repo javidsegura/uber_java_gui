@@ -1,0 +1,38 @@
+erDiagram
+    USERS ||--o{ RIDES_AS_PASSENGER : "requests"
+    USERS ||--o{ RIDES_AS_DRIVER : "accepts"
+    USERS ||--o{ CARS : "owns"
+    CARS ||--o{ RIDES : "used_in"
+    
+    USERS {
+        int user_id PK "Auto-increment primary key"
+        string name "User full name"
+        string email UK "University email (unique)"
+        string password_hash "Hashed password"
+        string role "PASSENGER, DRIVER, or BOTH"
+        datetime created_at "Account creation timestamp"
+    }
+    
+    CARS {
+        int car_id PK "Auto-increment primary key"
+        int driver_id FK "References USERS(user_id)"
+        string license_plate UK "Unique plate number"
+        string brand "Car manufacturer"
+        string model "Car model"
+        int seating_capacity "Total seats (1-8)"
+        datetime registered_at "Car registration timestamp"
+    }
+    
+    RIDES {
+        int ride_id PK "Auto-increment primary key"
+        int passenger_id FK "References USERS(user_id)"
+        int driver_id FK "References USERS(user_id), nullable until accepted"
+        int car_id FK "References CARS(car_id), nullable until accepted"
+        string origin "Starting location"
+        string destination "End location"
+        datetime request_time "When passenger created request"
+        datetime scheduled_time "When ride should happen"
+        int seats_needed "Number of seats passenger needs"
+        decimal price_estimate "Estimated cost (simple calculation)"
+        string status "PENDING, CONFIRMED, COMPLETED, CANCELLED"
+    }

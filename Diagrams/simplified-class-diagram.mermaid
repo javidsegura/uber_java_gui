@@ -1,0 +1,192 @@
+classDiagram
+    %% Core Abstract Class
+    class User {
+        <<abstract>>
+        #int userId
+        #String name
+        #String email
+        #String passwordHash
+        #String role
+        +login() boolean
+        +logout() void
+        +updateProfile() void
+        +switchRole(newRole) void
+    }
+
+    %% User Subclasses (Core Implementation)
+    class Passenger {
+        -List~Ride~ myRides
+        +createRideRequest(origin, destination, time, seats) Ride
+        +viewMyRequests() List~Ride~
+        +cancelRequest(rideId) boolean
+        +viewRideHistory() List~Ride~
+    }
+
+    class Driver {
+        -List~Car~ myCars
+        -boolean isAvailable
+        +addCar(carDetails) Car
+        +removeCar(carId) boolean
+        +viewOpenRequests() List~Ride~
+        +acceptRide(rideId) boolean
+        +declineRide(rideId) boolean
+        +markRideComplete(rideId) void
+        +viewMyAcceptedRides() List~Ride~
+    }
+
+    %% Core Entity Classes
+    class Car {
+        -int carId
+        -int driverId
+        -String licensePlate
+        -String brand
+        -String model
+        -int seatingCapacity
+        +getAvailableSeats() int
+        +isAvailable() boolean
+    }
+
+    class Ride {
+        -int rideId
+        -int passengerId
+        -int driverId
+        -int carId
+        -String origin
+        -String destination
+        -DateTime requestTime
+        -DateTime scheduledTime
+        -int seatsNeeded
+        -double priceEstimate
+        -RideStatus status
+        +calculatePrice() double
+        +assignDriver(driver, car) void
+        +updateStatus(status) void
+    }
+
+    class RideStatus {
+        <<enumeration>>
+        PENDING
+        CONFIRMED
+        COMPLETED
+        CANCELLED
+    }
+
+    %% Service Layer (Business Logic)
+    class AuthService {
+        -DatabaseManager db
+        +register(name, email, password, role) User
+        +login(email, password) User
+        +logout(userId) void
+        +validateEmail(email) boolean
+        +hashPassword(password) String
+        +switchUserRole(userId, newRole) void
+    }
+
+    class RideService {
+        -DatabaseManager db
+        +createRideRequest(passengerDetails) Ride
+        +listOpenRequests() List~Ride~
+        +acceptRide(rideId, driverId, carId) boolean
+        +markRideComplete(rideId) void
+        +getRidesByPassenger(passengerId) List~Ride~
+        +getRidesByDriver(driverId) List~Ride~
+        +cancelRide(rideId) boolean
+        +calculatePriceEstimate(origin, destination) double
+    }
+
+    %% Data Access Layer
+    class DatabaseManager {
+        -Connection connection
+        -String dbUrl
+        +connect() boolean
+        +disconnect() void
+        +executeQuery(sql) ResultSet
+        +executeUpdate(sql) int
+        +beginTransaction() void
+        +commit() void
+        +rollback() void
+    }
+
+    class UserDAO {
+        -DatabaseManager db
+        +save(user) boolean
+        +findById(id) User
+        +findByEmail(email) User
+        +update(user) boolean
+        +delete(id) boolean
+    }
+
+    class RideDAO {
+        -DatabaseManager db
+        +save(ride) boolean
+        +findById(id) Ride
+        +findPendingRides() List~Ride~
+        +findByPassenger(passengerId) List~Ride~
+        +findByDriver(driverId) List~Ride~
+        +update(ride) boolean
+    }
+
+    class CarDAO {
+        -DatabaseManager db
+        +save(car) boolean
+        +findById(id) Car
+        +findByDriver(driverId) List~Car~
+        +update(car) boolean
+        +delete(id) boolean
+    }
+
+    %% Custom Exceptions
+    class InvalidLoginException {
+        <<exception>>
+        +InvalidLoginException(message)
+    }
+
+    class CapacityExceededException {
+        <<exception>>
+        +CapacityExceededException(message)
+    }
+
+    class DatabaseException {
+        <<exception>>
+        +DatabaseException(message, cause)
+    }
+
+    %% Utility/Helper
+    class CSVExporter {
+        +exportRideHistory(userId, filepath) void
+        +exportCarList(driverId, filepath) void
+    }
+
+    %% Relationships
+    User <|-- Passenger
+    User <|-- Driver
+    
+    Driver "1" --> "0..*" Car : owns
+    Passenger "1" --> "0..*" Ride : requests
+    Driver "0..1" --> "0..*" Ride : accepts
+    Ride "1" --> "1" Car : uses
+    Ride "1" --> "1" RideStatus : has
+
+    AuthService --> User : manages
+    AuthService --> UserDAO : uses
+    AuthService --> DatabaseManager : uses
+    
+    RideService --> Ride : manages
+    RideService --> RideDAO : uses
+    RideService --> CarDAO : uses
+    RideService --> DatabaseManager : uses
+    
+    UserDAO --> DatabaseManager : uses
+    RideDAO --> DatabaseManager : uses
+    CarDAO --> DatabaseManager : uses
+    
+    RideService ..> CapacityExceededException : throws
+    AuthService ..> InvalidLoginException : throws
+    DatabaseManager ..> DatabaseException : throws
+    
+    CSVExporter --> Ride : exports
+    CSVExporter --> Car : exports
+
+    note for User "Abstract base class\nRole can be: PASSENGER, DRIVER, or BOTH"
+    note for RideService "Core business logic:\n- Match passengers with drivers\n- Validate capacity\n- Update ride status"
+    note for Ride "Main entity linking\nPassenger + Driver + Car"

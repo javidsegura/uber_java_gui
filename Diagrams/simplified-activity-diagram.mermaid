@@ -1,0 +1,58 @@
+graph TB
+    Start([Passenger wants a ride]) --> Login1{Logged in?}
+    
+    Login1 -->|No| Register[Register with<br/>university email]
+    Register --> Verify[Verify email]
+    Verify --> Login1
+    
+    Login1 -->|Yes| CreateRequest[Fill ride request form:<br/>- Origin<br/>- Destination<br/>- Time<br/>- Seats needed]
+    
+    CreateRequest --> Validate{Input valid?}
+    Validate -->|No| ShowError1[Show validation errors]
+    ShowError1 --> CreateRequest
+    
+    Validate -->|Yes| Calculate[Calculate price estimate<br/>distance × base_rate]
+    Calculate --> SaveRequest[Save ride to DB<br/>status = PENDING]
+    SaveRequest --> WaitDriver[Wait for driver to accept]
+    
+    WaitDriver --> Timeout{24h passed?}
+    Timeout -->|Yes| AutoCancel[Auto-cancel ride]
+    AutoCancel --> End1([Ride cancelled])
+    
+    Timeout -->|No| DriverCheck{Driver views<br/>open requests?}
+    
+    DriverCheck -->|No| WaitDriver
+    
+    DriverCheck -->|Yes| DriverLogin{Driver<br/>logged in?}
+    DriverLogin -->|No| DriverReg[Driver registers<br/>and adds car]
+    DriverReg --> DriverLogin
+    
+    DriverLogin -->|Yes| ViewRequests[Driver sees list of<br/>PENDING rides]
+    ViewRequests --> SelectRide[Driver selects a ride]
+    SelectRide --> ChooseCar[Driver chooses which car to use]
+    
+    ChooseCar --> CheckCapacity{Car capacity >=<br/>seats needed?}
+    
+    CheckCapacity -->|No| ErrorCapacity[Show error:<br/>CapacityExceededException]
+    ErrorCapacity --> ChooseCar
+    
+    CheckCapacity -->|Yes| AcceptRide[Assign driver & car to ride<br/>status = CONFIRMED]
+    AcceptRide --> NotifyPassenger[Notify passenger:<br/>Driver found!]
+    NotifyPassenger --> RideDay[Wait for scheduled time]
+    
+    RideDay --> Pickup[Driver picks up passenger]
+    Pickup --> Complete[Driver marks<br/>ride COMPLETED]
+    Complete --> UpdateDB[Update ride status in DB]
+    UpdateDB --> ExportOption{Want to export<br/>history?}
+    
+    ExportOption -->|Yes| ExportCSV[Export rides to CSV]
+    ExportCSV --> End2([Done])
+    
+    ExportOption -->|No| End2
+    
+    style Start fill:#e1f5ff
+    style End1 fill:#ffcccc
+    style End2 fill:#ccffcc
+    style CreateRequest fill:#fff4e1
+    style AcceptRide fill:#ccffcc
+    style ErrorCapacity fill:#ffcccc

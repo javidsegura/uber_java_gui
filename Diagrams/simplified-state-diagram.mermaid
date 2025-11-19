@@ -1,0 +1,37 @@
+stateDiagram-v2
+    [*] --> PENDING: Passenger creates ride request
+    
+    PENDING --> CONFIRMED: Driver accepts with valid car
+    PENDING --> CANCELLED: Passenger cancels<br/>or 24h timeout
+    
+    CONFIRMED --> COMPLETED: Driver marks complete
+    CONFIRMED --> CANCELLED: Passenger or Driver cancels
+    
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+    
+    note right of PENDING
+        - Ride request created
+        - Visible to all drivers
+        - driver_id and car_id are NULL
+        - Auto-cancel after 24 hours
+    end note
+    
+    note right of CONFIRMED
+        - Driver and car assigned
+        - driver_id and car_id populated
+        - Passenger notified
+        - Ready for pickup
+    end note
+    
+    note right of COMPLETED
+        - Ride finished
+        - Can be exported to CSV
+        - Visible in history
+    end note
+    
+    note right of CANCELLED
+        - Ride terminated
+        - Reason recorded
+        - Visible in history
+    end note
