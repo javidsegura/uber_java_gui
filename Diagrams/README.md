@@ -214,38 +214,34 @@ erDiagram
 Core interactions for Passenger-Driver matching workflow.
 
 ```mermaid
-graph TB
-    subgraph System["TeeTime Ride-Sharing System"]
-        subgraph PassengerCases["Passenger Use Cases"]
-            UC1[Register Account]
-            UC2[Login/Logout]
-            UC3[Create Ride Request]
-            UC4[View My Requests]
-            UC5[Cancel Pending Request]
-            UC6[View Ride History]
-            UC7[Switch to Driver Role]
-        end
-
-        subgraph DriverCases["Driver Use Cases"]
-            UC8[Add Car]
-            UC9[Remove Car]
-            UC10[View My Cars]
-            UC11[View Open Ride Requests]
-            UC12[Accept Ride Request]
-            UC13[Decline Ride Request]
-            UC14[View My Accepted Rides]
-            UC15[Mark Ride Complete]
-            UC16[Switch to Passenger Role]
-        end
-
-        subgraph SharedCases["Shared Functions"]
-            UC17[Update Profile]
-            UC18[Export Ride History CSV]
-        end
-    end
-
+graph LR
     Passenger((Passenger))
     Driver((Driver))
+
+    subgraph System["TeeTime Ride-Sharing System"]
+        direction TB
+
+        UC1[Register Account]
+        UC2[Login/Logout]
+        UC3[Create Ride Request]
+        UC4[View My Requests]
+        UC5[Cancel Pending Request]
+        UC6[View Ride History]
+        UC7[Switch to Driver Role]
+
+        UC8[Add Car]
+        UC9[Remove Car]
+        UC10[View My Cars]
+        UC11[View Open Ride Requests]
+        UC12[Accept Ride Request]
+        UC13[Decline Ride Request]
+        UC14[View My Accepted Rides]
+        UC15[Mark Ride Complete]
+        UC16[Switch to Passenger Role]
+
+        UC17[Update Profile]
+        UC18[Export Ride History CSV]
+    end
 
     Passenger --> UC1
     Passenger --> UC2
