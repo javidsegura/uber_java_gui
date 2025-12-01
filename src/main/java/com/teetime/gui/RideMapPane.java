@@ -73,6 +73,9 @@ public class RideMapPane extends BorderPane {
 
         openInMapsButton.setDisable(true);
         openInMapsButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");
+        openInMapsButton.setMaxHeight(35);
+        openInMapsButton.setPrefHeight(35);
+        openInMapsButton.setMaxWidth(Double.MAX_VALUE);
         openInMapsButton.setOnAction(e -> {
             Ride selected = rideListView.getSelectionModel().getSelectedItem();
             if (selected != null) {
