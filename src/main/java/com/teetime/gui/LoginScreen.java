@@ -3,6 +3,7 @@ package com.teetime.gui;
 import com.teetime.domain.User;
 import com.teetime.exception.InvalidLoginException;
 import com.teetime.service.AuthService;
+import javafx.application.HostServices;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,10 +16,12 @@ import javafx.stage.Stage;
 public class LoginScreen {
     private VBox view;
     private Stage stage;
+    private HostServices hostServices;
     private AuthService authService;
 
-    public LoginScreen(Stage stage) {
+    public LoginScreen(Stage stage, HostServices hostServices) {
         this.stage = stage;
+        this.hostServices = hostServices;
         this.authService = new AuthService();
         createView();
     }
@@ -154,11 +157,11 @@ public class LoginScreen {
 
     private void openDashboard(User user) {
         if (user.getRole().contains("DRIVER")) {
-            DriverDashboard dashboard = new DriverDashboard(stage, user);
+            DriverDashboard dashboard = new DriverDashboard(stage, user, hostServices);
             Scene scene = new Scene(dashboard.getView(), 1000, 700);
             stage.setScene(scene);
         } else {
-            PassengerDashboard dashboard = new PassengerDashboard(stage, user);
+            PassengerDashboard dashboard = new PassengerDashboard(stage, user, hostServices);
             Scene scene = new Scene(dashboard.getView(), 900, 600);
             stage.setScene(scene);
         }

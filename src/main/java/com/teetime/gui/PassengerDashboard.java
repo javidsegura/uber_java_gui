@@ -5,6 +5,7 @@ import com.teetime.domain.RideStatus;
 import com.teetime.domain.User;
 import com.teetime.service.CSVExportService;
 import com.teetime.service.RideService;
+import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -26,14 +27,16 @@ public class PassengerDashboard {
     private BorderPane view;
     private Stage stage;
     private User user;
+    private HostServices hostServices;
     private RideService rideService;
     private CSVExportService csvService;
     private TableView<Ride> ridesTable;
     private ObservableList<Ride> rides;
 
-    public PassengerDashboard(Stage stage, User user) {
+    public PassengerDashboard(Stage stage, User user, HostServices hostServices) {
         this.stage = stage;
         this.user = user;
+        this.hostServices = hostServices;
         this.rideService = new RideService();
         this.csvService = new CSVExportService();
         this.rides = FXCollections.observableArrayList();
@@ -181,7 +184,21 @@ public class PassengerDashboard {
         tableBox.getChildren().addAll(tableTitle, ridesTable, tableButtons);
 
         centerBox.getChildren().addAll(formBox, tableBox);
-        view.setCenter(new ScrollPane(centerBox));
+
+        ScrollPane dashboardScroll = new ScrollPane(centerBox);
+        dashboardScroll.setFitToWidth(true);
+
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        Tab dashboardTab = new Tab("Requests & Rides", dashboardScroll);
+        dashboardTab.setClosable(false);
+
+        Tab mapTab = new Tab("Ride Map", createRideMapTab());
+        mapTab.setClosable(false);
+
+        tabPane.getTabs().addAll(dashboardTab, mapTab);
+        view.setCenter(tabPane);
     }
 
     private void createRideRequest(String origin, String dest, java.time.LocalDate date, String time, int seats) {
@@ -229,7 +246,7 @@ public class PassengerDashboard {
     }
 
     private void logout() {
-        LoginScreen loginScreen = new LoginScreen(stage);
+        LoginScreen loginScreen = new LoginScreen(stage, hostServices);
         Scene scene = new Scene(loginScreen.getView(), 800, 600);
         stage.setScene(scene);
     }
@@ -240,6 +257,16 @@ public class PassengerDashboard {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private RideMapPane createRideMapTab() {
+        return new RideMapPane(
+            "Confirmed rides",
+            rides,
+            ride -> ride.getStatus() == RideStatus.CONFIRMED && ride.getDriverId() != null,
+            "No rides have been accepted yet.",
+            hostServices
+        );
     }
 
     public BorderPane getView() {

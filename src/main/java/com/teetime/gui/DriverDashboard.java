@@ -6,6 +6,7 @@ import com.teetime.domain.RideStatus;
 import com.teetime.domain.User;
 import com.teetime.service.CSVExportService;
 import com.teetime.service.RideService;
+import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -28,6 +29,7 @@ public class DriverDashboard {
     private BorderPane view;
     private Stage stage;
     private User user;
+    private HostServices hostServices;
     private RideService rideService;
     private CSVExportService csvService;
     private TableView<Car> carsTable;
@@ -37,9 +39,10 @@ public class DriverDashboard {
     private ObservableList<Ride> pendingRides;
     private ObservableList<Ride> myRides;
 
-    public DriverDashboard(Stage stage, User user) {
+    public DriverDashboard(Stage stage, User user, HostServices hostServices) {
         this.stage = stage;
         this.user = user;
+        this.hostServices = hostServices;
         this.rideService = new RideService();
         this.csvService = new CSVExportService();
         this.cars = FXCollections.observableArrayList();
@@ -82,8 +85,9 @@ public class DriverDashboard {
         Tab carsTab = new Tab("My Cars", createCarsTab());
         Tab requestsTab = new Tab("Available Requests", createRequestsTab());
         Tab myRidesTab = new Tab("My Accepted Rides", createMyRidesTab());
+        Tab rideMapTab = new Tab("Ride Map", createRideMapTab());
 
-        tabPane.getTabs().addAll(carsTab, requestsTab, myRidesTab);
+        tabPane.getTabs().addAll(carsTab, requestsTab, myRidesTab, rideMapTab);
         view.setCenter(tabPane);
     }
 
@@ -443,7 +447,7 @@ public class DriverDashboard {
     }
 
     private void logout() {
-        LoginScreen loginScreen = new LoginScreen(stage);
+        LoginScreen loginScreen = new LoginScreen(stage, hostServices);
         Scene scene = new Scene(loginScreen.getView(), 800, 600);
         stage.setScene(scene);
     }
@@ -454,6 +458,16 @@ public class DriverDashboard {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private RideMapPane createRideMapTab() {
+        return new RideMapPane(
+            "Accepted & completed rides",
+            myRides,
+            ride -> ride.getStatus() == RideStatus.CONFIRMED || ride.getStatus() == RideStatus.COMPLETED,
+            "Accept a ride to see it here.",
+            hostServices
+        );
     }
 
     public BorderPane getView() {

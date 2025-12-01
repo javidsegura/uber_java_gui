@@ -11,7 +11,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("TeeTime - Campus Ride Sharing");
         
-        LoginScreen loginScreen = new LoginScreen(primaryStage);
+        LoginScreen loginScreen = new LoginScreen(primaryStage, getHostServices());
         Scene scene = new Scene(loginScreen.getView(), 800, 600);
         
         primaryStage.setScene(scene);

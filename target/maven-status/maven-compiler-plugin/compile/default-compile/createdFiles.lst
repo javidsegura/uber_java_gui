@@ -1,3 +1,4 @@
+com/teetime/gui/RideMapPane.class
 com/teetime/gui/DriverDashboard$5.class
 com/teetime/domain/Passenger.class
 com/teetime/service/AuthService.class
@@ -11,6 +12,7 @@ com/teetime/service/RideService.class
 com/teetime/database/DatabaseManager.class
 com/teetime/gui/DriverDashboard$3.class
 com/teetime/gui/LoginScreen.class
+com/teetime/gui/RideMapPane$1.class
 com/teetime/gui/DriverDashboard$6.class
 com/teetime/gui/PassengerDashboard$1.class
 com/teetime/gui/DriverDashboard$4.class
